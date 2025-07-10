@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSIC Application Service Pricing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .simple-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .toggle-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .toggle-button:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .toggle-button:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .toggle-button.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .pricing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .recommended {
+            border: 3px solid #667eea;
+        }
+        
+        .recommended::before {
+            content: "Most Popular";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .plan-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-description {
+            color: #718096;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-note {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f7fafc;
+            position: relative;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .check-icon {
+            color: #48bb78;
+        }
+        
+        .cross-icon {
+            color: #e53e3e;
+        }
+        
+        .feature-text {
+            flex: 1;
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-trigger {
+            color: #667eea;
+            cursor: help;
+            margin-left: 0.5rem;
+            font-weight: 600;
+            background: #f0f4ff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border: 1px solid #667eea;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: #2d3748;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            max-width: 280px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2d3748;
+        }
+        
+        .tooltip-container:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .standard .cta-button {
+            background: #f7fafc;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .standard .cta-button:hover {
+            background: #e2e8f0;
+        }
+        
+        .silver .cta-button, .gold .cta-button {
+            background: #667eea;
+            color: white;
+        }
+        
+        .silver .cta-button:hover, .gold .cta-button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .detailed-view {
+            display: none !important;
+        }
+        
+        .detailed-view.active {
+            display: block !important;
+        }
+        
+        .simple-view {
+            display: none;
+        }
+        
+        .simple-view.active {
+            display: grid !important;
+        }
+        
+        .time-savings {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .pricing-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .pricing-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Choose Your Level of MSIC Application Support</h1>
+            <p>Professional MSIC application services with transparent pricing and expert guidance through every step of the process</p>
+        </div>
+        
+        <div class="simple-toggle">
+            <button class="toggle-button active" onclick="showSimple()">Simple View</button>
+            <button class="toggle-button" onclick="showDetailed()">Detailed Comparison</button>
+        </div>
+        
+        <!-- Simple View -->
+        <div class="pricing-container simple-view active">
+            <div class="pricing-card standard">
+                <div class="plan-header">
+                    <div class="plan-name">Standard Self-Service</div>
+                    <div class="plan-description">For confident applicants who want to complete everything themselves</div>
+                    <div class="plan-price">Lowest Rate</div>
+                    <div class="price-note">At checkout</div>
+                </div>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Online form access & secure document upload</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Real-time SMS/email status alerts</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Live phone/email support during business hours</span>
+                    </li>
+                </ul>
+                
+                <button class="cta-button">Get Started</button>
+            </div>
+            
+            <div class="pricing-card silver recommended">
+                <div class="plan-header">
+                    <div class="plan-name">Silver Assisted</div>
+                    <div class="plan-description">Perfect for those who need guidance and document pre-checking</div>
+                    <div class="plan-price">Standard + $60</div>
+                    <div class="price-note">Service upgrade</div>
+                </div>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Everything in Standard, plus:</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">We complete your online form over the phone</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Document review & issue flagging before submission</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Australia Post location guidance</span>
+                    </li>
+                </ul>
+                
+                <div class="time-savings">Saves up to 1.5 hours</div>
+                <button class="cta-button">Choose Silver</button>
+            </div>
+            
+            <div class="pricing-card gold">
+                <div class="plan-header">
+                    <div class="plan-name">Gold Concierge</div>
+                    <div class="plan-description">Full-service for complex cases and busy professionals</div>
+                    <div class="plan-price">Standard + $105</div>
+                    <div class="price-note">Concierge upgrade</div>
+                </div>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Everything in Silver, plus:</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Full phone service with priority support line</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">We handle complete document workflow</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Direct employer liaison for operational need letters</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="feature-text">Weekend/on-site verification when practical</span>
+                    </li>
+                </ul>
+                
+                <div class="time-savings">Saves up to 4 hours</div>
+                <button class="cta-button">Choose Gold</button>
+            </div>
+        </div>
+        
+        <!-- Detailed View -->
+        <div class="detailed-view">
+            <div style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0;">
+                            <th style="text-align: left; padding: 1rem; font-weight: 700; color: #2d3748;">Feature / Benefit</th>
+                            <th style="text-align: center; padding: 1rem; font-weight: 700; color: #2d3748;">Standard<br><span style="font-size: 0.9rem; font-style: italic; font-weight: 400;">Self-Service</span></th>
+                            <th style="text-align: center; padding: 1rem; font-weight: 700; color: #667eea;">Silver<br><span style="font-size: 0.9rem; font-style: italic; font-weight: 400;">Assisted</span></th>
+                            <th style="text-align: center; padding: 1rem; font-weight: 700; color: #667eea;">Gold<br><span style="font-size: 0.9rem; font-style: italic; font-weight: 400;">Concierge</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Indicative Price
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Base government fees apply to all plans. Service fees are additional.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center; color: #48bb78; font-weight: 600;">Lowest advertised checkout rate</td>
+                            <td style="padding: 1rem; text-align: center; color: #667eea; font-weight: 600;">Standard + $60 service upgrade</td>
+                            <td style="padding: 1rem; text-align: center; color: #667eea; font-weight: 600;">Standard + $105 concierge upgrade</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Who it's for
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Choose based on your experience level and time availability.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">Confident completing all steps yourself</td>
+                            <td style="padding: 1rem; text-align: center;">Need guidance & document pre-check</td>
+                            <td style="padding: 1rem; text-align: center;">Time-poor or complex cases (multiple addresses, overseas history)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Account Creation & Personal Information
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Setting up your secure account and completing all personal details accurately.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">✓</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (we complete it for you over the phone)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (full phone service)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                10 Years Address History Completion
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Most challenging requirement - we help you research and verify all addresses from the past decade.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">✓</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (guided assistance)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (we research for you)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Document Pre-check Before Submission
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">We review all documents to catch common errors that cause delays or rejections.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">—</td>
+                            <td style="padding: 1rem; text-align: center;">✓ We review & flag issues</td>
+                            <td style="padding: 1rem; text-align: center;">✓ We handle document workflow</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Operational Need Confirmation
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Proving you have legitimate business reasons to access secure port areas.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">—</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (guidance provided)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ We liaise directly with employer</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Australia Post Verification Support
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Assistance with in-person identity verification requirements and location guidance.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">—</td>
+                            <td style="padding: 1rem; text-align: center;">(which post office does MSIC verification)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (when practical, weekend/on-site options)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #f7fafc;">
+                            <td style="padding: 1rem; font-weight: 600;">
+                                Priority Support & Renewal Alerts
+                                <div class="tooltip-container">
+                                    <span class="tooltip-trigger">?</span>
+                                    <div class="tooltip">Proactive communication about your application status and future renewal requirements.</div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">✓ (standard support)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ (priority assistance)</td>
+                            <td style="padding: 1rem; text-align: center;">✓ Priority line & proactive alerts</td>
+                        </tr>
+                        <tr style="background: #f8f9ff; font-weight: 600;">
+                            <td style="padding: 1rem;">Typical Time Saved</td>
+                            <td style="padding: 1rem; text-align: center;">—</td>
+                            <td style="padding: 1rem; text-align: center; color: #48bb78;">Up to 1.5 hours</td>
+                            <td style="padding: 1rem; text-align: center; color: #48bb78;">Up to 4 hours</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Ensure DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize with simple view active
+            showSimple();
+        });
+        
+        function showSimple() {
+            const simpleView = document.querySelector('.simple-view');
+            const detailedView = document.querySelector('.detailed-view');
+            const buttons = document.querySelectorAll('.toggle-button');
+            
+            if (simpleView && detailedView && buttons.length >= 2) {
+                simpleView.classList.add('active');
+                detailedView.classList.remove('active');
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            }
+        }
+        
+        function showDetailed() {
+            const simpleView = document.querySelector('.simple-view');
+            const detailedView = document.querySelector('.detailed-view');
+            const buttons = document.querySelectorAll('.toggle-button');
+            
+            if (simpleView && detailedView && buttons.length >= 2) {
+                simpleView.classList.remove('active');
+                detailedView.classList.add('active');
+                buttons[0].classList.remove('active');
+                buttons[1].classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
